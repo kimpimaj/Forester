@@ -1,0 +1,3 @@
+﻿GetCompletedOrdersQueryResult {
+IssuedOrder { OrderId = order1, Issuer = salespersonA, occurredAt = 01/01/2022 13.00.00, recordedAt = 01/01/2022 14.00.00 }
+}

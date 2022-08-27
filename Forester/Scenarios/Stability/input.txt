@@ -1,0 +1,37 @@
+﻿#########################################
+# This scenario tests information stability.
+#########################################
+
+# Setup phase
+init-add-node salespersonA
+init-add-node harvesterB
+init-add-node harvesterC
+
+# Use controlled clock to manipulate time during scenario
+init --use-controlled-clock
+
+# Order 'order1' issued by 'salespersonA' in node 'salespersonA' to harvest 'site1'. 
+time-set 2022-01-01|13:00:00
+cmd-order-issue salespersonA order1 site1 salespersonA
+
+# Assing (transfer ownership) or 'order' at node 'salespersonA' to node 'harvesterB'
+time-set 2022-01-01|13:05:00
+cmd-order-assign salespersonA order1 harvesterB
+
+# Do sync to get the order placed to harvester
+time-set 2022-01-01|13:10:00
+cmd-sync salespersonA harvesterB
+
+cmd-order-harvested harvesterB order1 salespersonA
+
+# Sync nodes harvesterB and salespersonA
+cmd-sync salespersonA harvesterB
+cmd-sync harvesterC salespersonA
+
+# Check completed orders (uses stable-mode), there should not be any, as A thinks that B does not yet know that C knows about completion of order.
+validate-output Scenarios/Stability/output-1.txt query-completed-orders salespersonA
+
+### Synchronize so Completion of order1 is stabilized, as B gets information about what C knows, and can guarantee that every node knows about the completion.
+cmd-sync salespersonA harvesterB
+# A now knows that B knows about that C knows order1 is completed.
+validate-output Scenarios/Stability/output-2.txt query-completed-orders salespersonA

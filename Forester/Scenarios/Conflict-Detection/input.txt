@@ -1,0 +1,35 @@
+﻿#########################################
+# This scenario tests for conflict detection.
+#########################################
+
+# Setup phase
+init-add-node salespersonA
+init-add-node harvesterB
+init-add-node harvesterC
+
+# Use controlled clock to manipulate time during scenario
+init --use-controlled-clock
+
+# Order 'order1' issued by 'salespersonA' in node 'salespersonA' to harvest 'site1'. 
+time-set 2022-01-01|13:00:00
+cmd-order-issue salespersonA order1 site1 salespersonA
+
+# Assing (transfer ownership) or 'order' at node 'salespersonA' to node 'harvesterB'
+time-set 2022-01-01|13:05:00
+cmd-order-assign salespersonA order1 harvesterB
+
+cmd-identify-tree harvesterB site tree0 1000 1000 spruce
+cmd-cut-down harvesterB tree0
+cmd-cut-to-length harvesterB tree0 tree0-log1 1000 1100 6 2
+cmd-cut-to-length harvesterB tree0 tree0-log2 1000 1100 6 2
+
+cmd-sync salespersonA harvesterB
+cmd-sync harvesterB harvesterC
+
+# Both harvesters identifies tree1. This causes concurrent update to the stream 'tree1'.
+cmd-identify-tree harvesterC site tree1 1000 1000 spruce
+cmd-identify-tree harvesterB site tree1 1000 1000 spruce
+cmd-identify-tree harvesterC site tree2 2000 2000 spruce
+
+# Validate that conflict is detected.
+validate-output Scenarios/Conflict-Detection/output.txt cmd-sync harvesterB harvesterC

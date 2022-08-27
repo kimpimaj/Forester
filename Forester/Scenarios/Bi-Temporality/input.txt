@@ -1,0 +1,25 @@
+﻿#########################################
+# This scenario tests bi-temporality.
+#########################################
+
+# Setup phase
+init-add-node salespersonA
+init-add-node harvesterB
+
+# Use controlled clock to manipulate time during scenario
+init --use-controlled-clock
+
+# Issue order at t0
+time-set 2022-01-01|13:00:00
+cmd-order-issue salespersonA order1 site1 salespersonA
+
+# Sync at t2
+time-set 2022-01-01|14:00:00
+cmd-sync salespersonA harvesterB
+
+validate-output Scenarios/Bi-Temporality/output-1.txt query-issued-orders salespersonA
+validate-output Scenarios/Bi-Temporality/output-2.txt query-issued-orders harvesterB
+
+# Do validations using t1 as viewpoint.
+validate-output Scenarios/Bi-Temporality/output-3.txt query-issued-orders salespersonA 2022-01-01|13:30:00 2022-01-01|13:30:00
+validate-output Scenarios/Bi-Temporality/output-4.txt query-issued-orders harvesterB 2022-01-01|13:30:00 2022-01-01|13:30:00

@@ -1,0 +1,4 @@
+﻿GetCompletedOrdersQueryResult {
+CompletedOrder { OrderId = order1, Report = Total of 0 logs:
+ }
+}
